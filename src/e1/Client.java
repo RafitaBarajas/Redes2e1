@@ -15,9 +15,10 @@ public class Client {
     public static void main(String[] args) {
         
         int opt;
-        int[][] board9 = new int[9][9];
-        int[][] board16= new int[16][16];
-        int[][] board30 = new int[16][30];
+        
+        Tile[][] board9 = new Tile[9][9];
+        Tile[][] board16 = new Tile[16][16];
+        Tile[][] board30 = new Tile[16][30];
         
         String scores;
         
@@ -43,34 +44,94 @@ public class Client {
             switch (opt) {
                 case 0:
                     scores = dis.readUTF();
+                    System.out.println(scores);
                     break;
                 case 1:
-                    board9 = getBoard(9, 9);
+                    board9 = tileNumbers( arrToTiles( getBoard(9, 9, dis) ) );
                     break;
                 case 2:
-                    board16 = getBoard(16, 16);
+                    board16 = tileNumbers( arrToTiles( getBoard(16, 16, dis) ) );
                     break;
                 case 3:
-                    board30 = getBoard(16, 30);
-                    break;
-                default:
+                    board30 = tileNumbers( arrToTiles( getBoard(16, 30, dis) ) );
                     break;
             }
             
             cl.close();
             dos.close();
+            dis.close();
         } catch(Exception e){
             e.printStackTrace();
         }
         
     }
     
-    public static int[][] getBoard(int rows, int cols){
+    public static int[][] getBoard(int rows, int cols, DataInputStream dis){
         int[][] board = new int[rows][cols];
+        
+        try{
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    board[i][j] = dis.readInt(); //0 -> no bomba, -1 -> bomba
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         
         return board;
     }
     
+    public static Tile[][] arrToTiles(int[][] arr){
+        Tile[][] b = new Tile[arr.length][arr[0].length];
+        
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr[0].length; j++) {
+                b[i][j] = new Tile(0, arr[i][j]);
+            }
+        }
+        
+        return b;
+    }
     
+    public static Tile[][] tileNumbers(Tile[][] board){
+        //Tile[][] b = new Tile[board.length][board[0].length];
+        
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j].getNumber() == -1) {
+                    if (i != 0) {
+                        board[i - 1][j].plusOne();
+                    }
+                    if (i != board.length - 1) {
+                        board[i + 1][j].plusOne();
+                    }
+                    
+                    if (j != 0){
+                        board[i][j - 1].plusOne();
+                    }
+                    if (j != board[0].length - 1){
+                        board[i][j + 1].plusOne();
+                    }
+                    
+                    if (i != 0 && j != 0) {
+                        board[i - 1][j - 1].plusOne();
+                    }
+                    if (i != 0 && j != board[0].length - 1){
+                        board[i - 1][j + 1].plusOne();
+                    }
+                    
+                    if (i != (board.length - 1) && j != 0) {
+                        board[i + 1][j - 1].plusOne();
+                    }
+                    if (i != (board.length - 1) && j != (board[0].length - 1)) {
+                        board[i + 1][j + 1].plusOne();
+                    }
+                }
+            }
+        }
+        
+        return board;
+    }
     
 }

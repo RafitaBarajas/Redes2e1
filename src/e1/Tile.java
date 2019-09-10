@@ -10,7 +10,6 @@ public class Tile {
     public Tile (){
         status = 0;
         number = 0;
-        
     }
     
     public Tile (int s, int num){
