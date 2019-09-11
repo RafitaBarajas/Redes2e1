@@ -22,6 +22,40 @@ public class Tile {
             number++;
         }
     }
+    
+    public void printTile(){
+        switch (status) {
+            case 0:
+                System.out.print("□ ");
+                break;
+            case 1:
+                if(number == -1){
+                    System.out.print("☼ ");
+                } else {
+                    System.out.print(number + " ");
+                }
+                break;
+            case 2:
+                System.out.println("■ ");
+                break;
+        }
+    }
+    
+    public int open(boolean force){
+        switch (status) {
+            case 1:
+                return -2;
+            case 2:
+                if(force){
+                    status = 1;
+                    return number;
+                }
+                return -3;
+            default:
+                status = 1;
+                return number;
+        }
+    }
 
     public void setStatus(int status) {
         this.status = status;
