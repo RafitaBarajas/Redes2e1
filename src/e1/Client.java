@@ -15,12 +15,15 @@ public class Client {
     public static void main(String[] args) {
         
         int opt, status;
+        long time;
         
         Tile[][] board9 = new Tile[9][9];
         Tile[][] board16 = new Tile[16][16];
         Tile[][] board30 = new Tile[16][30];
         
         String scores;
+        
+        status = 0;
         
         try{
             Socket cl = new Socket(host, pto);
@@ -46,6 +49,8 @@ public class Client {
             dos.write(opt);
             dos.flush();
             
+            time = System.nanoTime();
+            
             switch (opt) {
                 case 4:
                     scores = dis.readUTF();
@@ -65,9 +70,19 @@ public class Client {
                     break;
             }
             
-            //regresar si ganó o perdió.
-            //tomar tiempo desde que empezó a jugar
-            //si gana mandar tiempo.
+            time = System.nanoTime() - time;
+            time = time / 1000000000; //nanoseconds to seconds
+            
+            dos.writeInt(status);
+            dos.flush();
+            
+            if(status == 1){
+                System.out.println("Tu tiempo: " + time + "s");
+                System.out.println("Ingresa tu nombre:");
+                
+                dos.writeUTF(scan.nextLine() + " " + time);
+                dos.flush();
+            }
             
             cl.close();
             dos.close();
@@ -150,56 +165,85 @@ public class Client {
         int row, col;
         int opc, num;
         int status; // 0 -> sigue vivo, 1 -> ganó, -1 -> perdió
-        
+        boolean flag;
+        String in;
         
         status = 0;
+        flag = false;
         
         printBoard(board);
         
         while(status == 0){
-            System.out.println("Elige una fila.");
-            row = s.nextInt();
+            
+            if(flag){
+                System.out.println("ESTÁS EN MODO BANDERA");
+            }
+            
+            System.out.println("(Ingresa una F si quieres activar o desactivar el modo bandera)");
+            System.out.println(" Elige una fila.");
+            in = s.nextLine();
+            if(in.equals("F") || in.equals("f")){
+                flag = !flag;
+                printBoard(board);
+            } else {
+                row = Integer.parseInt(in);
 
-            System.out.println("Elige una columna.");
-            col = s.nextInt();
+                System.out.println(" Elige una columna.");
+                col = s.nextInt();
 
-            num = board[row][col].open(false);
-            switch (num){
-                case -1:
-                    System.out.println("BOOM KAPOOOM KATAPLUM");
-                    System.out.println("Perdiste.");
-                    status = -1;
-                    break;
-                case -2:
-                    System.out.println("Esa casilla ya está abierta.");
-                    break;
-                case -3:
-                    System.out.println("La casilla está marcada con una bandera.");
-                    System.out.println("¿Estás seguro de que quieres abrirla?");
-                    System.out.println(" 1. Sí");
-                    System.out.println(" 2. No");
-                    opc = s.nextInt();
-
-                    if(opc == 1){
-                        num = board[row][col].open(true);
-                        if(num == -1){
+                if(flag){
+                    board[row][col].flag();
+                    printBoard(board);
+                } else {
+                
+                    num = board[row][col].open(false);
+                    switch (num){
+                        case -1:
+                            printBoard(board);
                             System.out.println("BOOM KAPOOOM KATAPLUM");
                             System.out.println("Perdiste.");
                             status = -1;
                             break;
-                        }
-                    } else {
-                        break;
-                    }
-                default:
-                    //Pues le dió a un número jaja
-                    //checar si es cero se destapen las de alrededor
-                    //checar si ya ganó (status = 1), contando las casillas que quedan cerradas y las minas totales
-                    //falta modo bandera.
-                    //ver lo de clearear el output cada que mete una casilla
-            }
+                        case -2:
+                            System.out.println("Esa casilla ya está abierta.");
+                            break;
+                        case -3:
+                            System.out.println("La casilla está marcada con una bandera.");
+                            System.out.println("¿Estás seguro de que quieres abrirla?");
+                            System.out.println(" 1. Sí");
+                            System.out.println(" 2. No");
+                            opc = s.nextInt();
 
-        }
+                            if(opc == 1){
+                                num = board[row][col].open(true);
+                                if(num == -1){
+                                    printBoard(board);
+                                    System.out.println("BOOM KAPOOOM KATAPLUM");
+                                    System.out.println("Perdiste.");
+                                    status = -1;
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        default:
+                            printBoard(board);
+
+                            status = checkWin(board);
+
+                            if(status == 1){
+                                System.out.println("You did it, you crazy son of a ***** you did it.");
+                            }
+
+                            //checar si es cero se destapen las de alrededor
+                            //ver lo de clearear el output cada que mete una casilla
+                            
+                    }//switch num
+                }//if flag
+                
+            }//if F
+
+        }//while
         
         return status;
     }
@@ -227,6 +271,38 @@ public class Client {
             System.out.println("");
         }
         System.out.println("");
+        
+    }
+    
+    public static int checkWin(Tile[][] board){
+        int nMines = 0;
+        int nOpenTiles = 0;
+        
+        switch (board[0].length) {
+            case 9:
+                nMines = 10;
+                break;
+            case 16:
+                nMines = 40;
+                break;
+            case 30:
+                nMines = 99;
+                break;
+        }
+        
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if(board[i][j].getStatus() == 1){
+                    nOpenTiles++;
+                }
+            }
+        }
+        
+        if(nOpenTiles == ((board.length * board[0].length) - nMines)){
+            return 1;
+        } else {
+            return 0;
+        }
         
     }
     

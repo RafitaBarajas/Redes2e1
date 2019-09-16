@@ -56,6 +56,14 @@ public class Tile {
                 return number;
         }
     }
+    
+    public void flag(){
+        if (status == 0) {
+            status = 2;
+        } else if(status == 2){
+            status = 0;
+        }
+    }
 
     public void setStatus(int status) {
         this.status = status;
