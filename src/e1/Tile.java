@@ -43,9 +43,9 @@ public class Tile {
     
     public int open(boolean force){
         switch (status) {
-            case 1:
+            case 1: //The tile is already open
                 return -2;
-            case 2:
+            case 2: //The tile has a flag
                 if(force){
                     status = 1;
                     return number;

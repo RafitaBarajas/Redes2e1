@@ -171,19 +171,21 @@ public class Client {
         status = 0;
         flag = false;
         
+        clearOutput();
         printBoard(board);
         
         while(status == 0){
             
-            if(flag){
+            if(flag)
                 System.out.println("ESTÁS EN MODO BANDERA");
-            }
-            
+           
             System.out.println("(Ingresa una F si quieres activar o desactivar el modo bandera)");
             System.out.println(" Elige una fila.");
             in = s.nextLine();
+            
             if(in.equals("F") || in.equals("f")){
                 flag = !flag;
+                clearOutput();
                 printBoard(board);
             } else {
                 row = Integer.parseInt(in);
@@ -193,12 +195,14 @@ public class Client {
 
                 if(flag){
                     board[row][col].flag();
+                    clearOutput();
                     printBoard(board);
                 } else {
                 
                     num = board[row][col].open(false);
                     switch (num){
                         case -1:
+                            clearOutput();
                             printBoard(board);
                             System.out.println("BOOM KAPOOOM KATAPLUM");
                             System.out.println("Perdiste.");
@@ -217,6 +221,7 @@ public class Client {
                             if(opc == 1){
                                 num = board[row][col].open(true);
                                 if(num == -1){
+                                    clearOutput();
                                     printBoard(board);
                                     System.out.println("BOOM KAPOOOM KATAPLUM");
                                     System.out.println("Perdiste.");
@@ -227,6 +232,10 @@ public class Client {
                                 break;
                             }
                         default:
+                            if(num == 0){
+                                openAround(board, row, col);
+                            }
+                            clearOutput();
                             printBoard(board);
 
                             status = checkWin(board);
@@ -234,16 +243,14 @@ public class Client {
                             if(status == 1){
                                 System.out.println("You did it, you crazy son of a ***** you did it.");
                             }
-
-                            //checar si es cero se destapen las de alrededor
-                            //ver lo de clearear el output cada que mete una casilla
-                            
-                    }//switch num
-                }//if flag
+                                                        
+                    }
+                    
+                }
                 
-            }//if F
+            }
 
-        }//while
+        }
         
         return status;
     }
@@ -306,4 +313,46 @@ public class Client {
         
     }
     
+    public static void openAround(Tile[][] b, int r, int c){
+        
+        if (r != 0)
+            if (b[r - 1][c].open(true) == 0)
+                openAround(b, (r - 1), c);
+        
+        if (r != b.length - 1)
+            if (b[r + 1][c].open(true) == 0)
+                openAround(b, (r + 1), c);
+        
+        
+        if (c != 0)
+            if (b[r][c - 1].open(true) == 0)
+                openAround(b, r, (c - 1));
+                
+        if (c != b[0].length - 1)
+            if (b[r][c + 1].open(true) == 0)
+                openAround(b, r, (c + 1));
+        
+        
+        if (r != 0 && c != 0)
+            if (b[r - 1][c - 1].open(true) == 0)
+                openAround(b, (r - 1), (c - 1));
+        
+        if (r != 0 && c != b[0].length - 1)
+            if (b[r - 1][c + 1].open(true) == 0)
+                openAround(b, (r - 1), (c + 1));
+        
+
+        if (r != (b.length - 1) && c != 0)
+            if (b[r + 1][c - 1].open(true) == 0)
+                openAround(b, (r + 1), (c - 1));
+        
+        if (r != (b.length - 1) && c != (b[0].length - 1))
+            if (b[r + 1][c + 1].open(true) == 0)
+                openAround(b, (r + 1), (c + 1));        
+    }
+    
+    public static void clearOutput() {  
+        System.out.print("\033[H\033[2J");  
+        System.out.flush();  
+    }  
 }
