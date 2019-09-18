@@ -21,7 +21,7 @@ public class Client {
         Tile[][] board16 = new Tile[16][16];
         Tile[][] board30 = new Tile[16][30];
         
-        String scores;
+        String scores, name;
         
         status = 0;
         
@@ -73,6 +73,9 @@ public class Client {
             time = System.nanoTime() - time;
             time = time / 1000000000; //nanoseconds to seconds
             
+            if(status == -1)
+                status = 0;
+            
             dos.writeInt(status);
             dos.flush();
             
@@ -80,7 +83,10 @@ public class Client {
                 System.out.println("Tu tiempo: " + time + "s");
                 System.out.println("Ingresa tu nombre:");
                 
-                dos.writeUTF(scan.nextLine() + " " + time);
+                name = scan.next();
+                name = name + " " + time;
+                
+                dos.writeUTF(name);
                 dos.flush();
             }
             
@@ -181,7 +187,7 @@ public class Client {
            
             System.out.println("(Ingresa una F si quieres activar o desactivar el modo bandera)");
             System.out.println(" Elige una fila.");
-            in = s.nextLine();
+            in = s.next();
             
             if(in.equals("F") || in.equals("f")){
                 flag = !flag;
@@ -257,12 +263,13 @@ public class Client {
     
     public static void printBoard(Tile[][] board){
         System.out.print("  \t");
-        for (int i = 0; i <= board[0].length; i++) {
+        for (int i = 0; i < board[0].length; i++) {
             if(i < 10){
                 System.out.print(" ");
             }
             System.out.print(i + " ");
         }
+        System.out.println("");
         System.out.println("");
         
         for (int i = 0; i < board.length; i++) {

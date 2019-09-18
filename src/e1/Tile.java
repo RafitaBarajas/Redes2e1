@@ -36,7 +36,7 @@ public class Tile {
                 }
                 break;
             case 2:
-                System.out.println("■ ");
+                System.out.print("■ ");
                 break;
         }
     }
